@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 #
@@ -7,17 +8,17 @@
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3
 #
 
-rpi_ver=@1
-dev=@2
+rpi_ver=$1
+dev=$2
 
-if [[ -c "$dev" ]]; then
+if [[ -z "$@" || "$@" == "--help" ]]; then
     echo ""
     echo "Usage:  <version> <device>"
     echo ""
     echo " <version> can be: "
-    echo "  1 for Raspberry Pi Zero / Zero W / 1"
-    echo "  2 for Raspberry Pi 2 / 3"
-    echo "  3 for Raspberry Pi 3 / 3+"
+    echo "  1 for Raspberry Pi Zero / Zero W / 1 (ARM v6) "
+    echo "  2 for Raspberry Pi 2 / 3 (ARM v7) "
+    echo "  3 for Raspberry Pi 3 / 3+ (ARM v8) "
     echo ""
     echo " <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
     echo ""
@@ -36,13 +37,13 @@ elif [[ "$rpi_ver" -eq 2 ]]; then
     rootfs=ArchLinuxARM-rpi-2-latest.tar.gz
 elif [[ "$rpi_ver" -eq 3 ]]; then
     rootfs=ArchLinuxARM-rpi-3-latest.tar.gz
-elif
+else
     echo "RPi version can be in range 1-3. Exiting."
     exit
 fi
 
-if [[ -b "$dev" ]]; then
-    echo "Selected device is not special block file. Exiting."
+if [[ ! -b "$dev" ]]; then
+    echo "No device selected or not special block file. Exiting."
     exit
 fi
 
@@ -79,4 +80,3 @@ echo "Unmounting file systems."
 umount boot root
 
 echo "Done."
-
