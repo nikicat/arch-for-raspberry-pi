@@ -112,5 +112,8 @@ mv root/boot/* boot && sync
 
 echo "Unmounting file systems."
 umount boot root
+if [[ "$?" -ne "0" ]]; then
+    echo "Error while unmounting filesystems."
+fi
 
 echo "Done."
