@@ -56,20 +56,27 @@ if [[ "$?" -ne "0" ]]; then
 fi
 
 echo "Creating disk layout."
-
 parted --script "$dev" mklabel msdos
 if [[ "$?" -ne "0" ]]; then
     echo "Error while creating disk layout. Exiting." && exit
 fi
 
+echo "Creating boot partition on $dev"
 parted --script "$dev" mkpart primary fat32 0 100
 if [[ "$?" -ne "0" ]]; then
-    echo "Error while creating disk layout. Exiting." && exit
+    echo "Error while creating disk layout for boot partition. Exiting." && exit
 fi
 
+echo "Setting boot flag on partition."
+parted --script "$dev" set 1 boot on
+if [[ "$?" -ne "0" ]]; then
+    echo "Error while setting boot flag on partition. Exiting." && exit
+fi
+
+echo "Creating root partition on $dev "
 parted --script "$dev" mkpart primary ext4 100 100%
 if [[ "$?" -ne "0" ]]; then
-    echo "Error while creating disk layout. Exiting." && exit
+    echo "Error while creating disk layout for root partition. Exiting." && exit
 fi
 
 echo "Creating boot file systems."
@@ -84,13 +91,13 @@ if [[ "$?" -ne "0" ]]; then
     echo "Error while creating root file system on "$dev""2" . Exiting." && exit
 fi
 
-echo "Mounting file systems."
-
+echo "Mounting boot file system."
 mount "$dev""1" boot
 if [[ "$?" -ne "0" ]]; then
     echo "Error while mounting "$dev""1" . Exiting." && exit
 fi
 
+echo "Mounting root file system."
 mount "$dev""2" root
 if [[ "$?" -ne "0" ]]; then
     echo "Error while mounting "$dev""2" . Exiting." && exit
