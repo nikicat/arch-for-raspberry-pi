@@ -113,7 +113,10 @@ mv root/boot/* boot && sync
 echo "Unmounting file systems."
 umount boot root
 if [[ "$?" -ne "0" ]]; then
-    echo "Error while unmounting filesystems."
+    echo "Error while unmounting filesystems." && exit
 fi
+
+echo "Cleaning up."
+cd - && rm -r $temp_dir
 
 echo "Done."
