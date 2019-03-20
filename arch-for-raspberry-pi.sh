@@ -10,7 +10,7 @@ dev=$2
 
 if [[ -z "$@" || "$@" == "--help" ]]; then
     echo ""
-    echo "Usage:  <version> <device>"
+    echo "Usage: $0 <version> <device>"
     echo ""
     echo " <version> can be: "
     echo "  1 for Raspberry Pi Zero / Zero W / 1 (ARM v6) "
