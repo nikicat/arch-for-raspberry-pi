@@ -2,18 +2,7 @@
 Script to write Arch Linux images for Raspberry Pi
 
 # Usage
-Usage: ./arch-for-raspberry-pi.sh <version> <device>
-
- <version> can be: 
- 
-  1 for Raspberry Pi Zero / Zero W / 1 (ARM v6) 
-  
-  2 for Raspberry Pi 2 / 3 (ARM v7) 
-  
-  3 for Raspberry Pi 3 / 3+ (ARM v8) 
-  
-
- <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX
+./arch-for-raspberry-pi.sh --help
 
 # Download images
 Prebuild images can be found in releases section:
@@ -26,6 +15,7 @@ On Linux/Unix/BSD you can use dd:
 dd if=ArchLinuxARM-rpi-2-latest.img of=/dev/sdX bs=2M status=progress
 
 Output device file may be in form of '/dev/mmcblkX'. Make sure you have selected the right device before flashing!!
+
 
 
 On Windows you can use one of those:
