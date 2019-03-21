@@ -16,8 +16,6 @@ dd if=ArchLinuxARM-rpi-2-latest.img of=/dev/sdX bs=2M status=progress
 
 Output device file may be in form of '/dev/mmcblkX'. Make sure you have selected the right device before flashing!!
 
-
-
 On Windows you can use one of those:
 
 https://www.osforensics.com/tools/write-usb-images.html
@@ -33,3 +31,11 @@ dtoverlay=pi3-disable-bt
 
 enable_uart=1
 
+# First steps
+Initialize the pacman keyring, populate the Arch Linux ARM package signing keys and update system: 
+
+pacman-key --init
+
+pacman-key --populate archlinuxarm
+
+pacman -Syyu
