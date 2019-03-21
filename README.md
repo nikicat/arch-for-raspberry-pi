@@ -31,11 +31,19 @@ dtoverlay=pi3-disable-bt
 
 enable_uart=1
 
-# First steps
-Initialize the pacman keyring, populate the Arch Linux ARM package signing keys and update system: 
+# Initialize the pacman keyring, populate the Arch Linux ARM package signing keys and update system
+pacman -Scc
+
+rm -r /var/lib/pacman/sync /etc/pacman.d/gnupg
 
 pacman-key --init
 
 pacman-key --populate archlinuxarm
 
-pacman -Syyu
+pacman -Syu
+
+# Resize root partition
+fdisk /dev/mmcblk0 # Delete partition 2, create new one with new size
+
+resize2fs /dev/mmcblk0p2
+
