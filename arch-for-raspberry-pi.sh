@@ -7,7 +7,10 @@
 
 rpi_ver=$1
 dev=$2
+part1=$dev"1"
+part2=$dev"2"
 
+# Menu
 if [[ -z "$@" || "$@" == "--help" ]]; then
     echo ""
     echo "Usage: $0 <version> <device>"
@@ -15,18 +18,31 @@ if [[ -z "$@" || "$@" == "--help" ]]; then
     echo " <version> can be: "
     echo "  1 for Raspberry Pi Zero / Zero W / 1 (ARM v6) "
     echo "  2 for Raspberry Pi 2 / 3 (ARM v7) "
-    echo "  3 for Raspberry Pi 3 / 3+ (ARM v8) "
+    echo "  3 for Raspberry Pi 3 / 3+ (ARM v8 / AAarch64) "
     echo ""
     echo " <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
     echo ""
     exit
 fi
 
-which wget bsdtar parted &>/dev/null
-if [[ $? -ne 0 ]]; then
-    echo "I need 'wget', 'bsdtar', 'parted' and 'dosfstools' to be installed. Exiting." && exit
+# Check for required tools
+if ! command -v wget > /dev/null; then
+    echo -e "I need those packages to be installed: \nwget bsdtar parted dosfstools \nExiting." && exit
 fi
 
+if ! command -v bsdtar > /dev/null; then
+    echo -e "I need those packages to be installed: \nwget bsdtar parted dosfstools \nExiting." && exit
+fi
+
+if ! command -v parted > /dev/null; then
+    echo -e "I need those packages to be installed: \nwget bsdtar parted dosfstools \nExiting." && exit
+fi
+
+if ! command -v dosfstools > /dev/null; then
+    echo -e "I need those packages to be installed: \nwget bsdtar parted dosfstools \nExiting." && exit
+fi
+
+# Select RPi version
 if [[ "$rpi_ver" -eq 1 ]]; then
     rootfs=ArchLinuxARM-rpi-latest.tar.gz
 elif [[ "$rpi_ver" -eq 2 ]]; then
@@ -37,86 +53,76 @@ else
     echo "RPi version can be in range 1-3. Exiting." && exit
 fi
 
+# Check device file
 if [[ ! -b "$dev" ]]; then
     echo "No device selected or not special block file. Exiting." && exit
 fi
 
-dl_url="http://os.archlinuxarm.org/os/$rootfs"
-
-temp_dir=`mktemp -d`
-
+# Create temp dir
+temp_dir=$(mktemp -d)
 echo "Entering working dir: $temp_dir"
-cd "$temp_dir"
+if ! cd "$temp_dir"; then
+    echo "Error while creating temp dir. Exiting." && exit
+fi
 mkdir boot root
 
 echo "Downloading root FS."
-wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"
-if [[ "$?" -ne "0" ]]; then
+if ! wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"; then
     echo "Error while downloading FS. Exiting." && exit
 fi
 
 echo "Creating disk layout."
-parted --script "$dev" mklabel msdos
-if [[ "$?" -ne "0" ]]; then
+if ! parted --script "$dev" mklabel msdos; then
     echo "Error while creating disk layout. Exiting." && exit
 fi
 
 echo "Creating boot partition on $dev"
-parted --script "$dev" mkpart primary fat32 0 100
-if [[ "$?" -ne "0" ]]; then
+if ! parted --script "$dev" mkpart primary fat32 0 100; then
     echo "Error while creating disk layout for boot partition. Exiting." && exit
 fi
 
 echo "Setting boot flag on partition."
-parted --script "$dev" set 1 boot on
-if [[ "$?" -ne "0" ]]; then
+if ! parted --script "$dev" set 1 boot on; then
     echo "Error while setting boot flag on partition. Exiting." && exit
 fi
 
 echo "Creating root partition on $dev "
-parted --script "$dev" mkpart primary ext4 100 100%
-if [[ "$?" -ne "0" ]]; then
+if ! parted --script "$dev" mkpart primary ext4 100 100%; then
     echo "Error while creating disk layout for root partition. Exiting." && exit
 fi
 
 echo "Creating boot file systems."
-mkfs.vfat "$dev""1"
-if [[ "$?" -ne "0" ]]; then
-    echo "Error while creating boot file system on "$dev""1" . Exiting." && exit
+if ! mkfs.vfat "$part1"; then
+    echo "Error while creating boot file system on $part1. Exiting." && exit
 fi
 
 echo "Creating root file systems."
-mkfs.ext4 "$dev""2"
-if [[ "$?" -ne "0" ]]; then
-    echo "Error while creating root file system on "$dev""2" . Exiting." && exit
+if ! mkfs.ext4 "$part2"; then
+    echo "Error while creating root file system on $part2. Exiting." && exit
 fi
 
 echo "Mounting boot file system."
-mount "$dev""1" boot
-if [[ "$?" -ne "0" ]]; then
-    echo "Error while mounting "$dev""1" . Exiting." && exit
+if ! mount "$part1" boot; then
+    echo "Error while mounting $part1. Exiting." && exit
 fi
 
 echo "Mounting root file system."
-mount "$dev""2" root
-if [[ "$?" -ne "0" ]]; then
-    echo "Error while mounting "$dev""2" . Exiting." && exit
+if ! mount "$part2" root; then
+    echo "Error while mounting $part2. Exiting." && exit
 fi
 
 echo "Unpacking rootfs."
-bsdtar -xpf "$rootfs" -C root >/dev/null && sync
-if [[ "$?" -ne "0" ]]; then
+if ! bsdtar -xpf "$rootfs" -C root >/dev/null; then
     echo "Error while unpacking rootfs. Exiting." && exit
 fi
-mv root/boot/* boot && sync
+sync && mv root/boot/* boot && sync
 
 echo "Unmounting file systems."
-umount boot root
-if [[ "$?" -ne "0" ]]; then
+if ! umount boot root; then
     echo "Error while unmounting filesystems." && exit
 fi
 
 echo "Cleaning up."
-cd - && rm -r $temp_dir
+cd - && rm -r "$temp_dir"
 
 echo "Done."
