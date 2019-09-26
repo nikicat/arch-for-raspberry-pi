@@ -4,6 +4,7 @@
 # https://archlinuxarm.org/platforms/armv6/raspberry-pi
 # https://archlinuxarm.org/platforms/armv7/broadcom/raspberry-pi-2
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3
+# https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4
 
 rpi_ver=$1
 dev=$2
@@ -11,7 +12,7 @@ part1=$dev"1"
 part2=$dev"2"
 
 # Menu
-if [[ -z "$@" || "$@" == "--help" ]]; then
+if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo ""
     echo "Usage: $0 <version> <device>"
     echo ""
@@ -19,6 +20,7 @@ if [[ -z "$@" || "$@" == "--help" ]]; then
     echo "  1 for Raspberry Pi Zero / Zero W / 1 (ARM v6) "
     echo "  2 for Raspberry Pi 2 / 3 (ARM v7) "
     echo "  3 for Raspberry Pi 3 / 3+ (ARM v8 / AAarch64) "
+    echo "  4 for Raspberry Pi 4 (ARM v8) "
     echo ""
     echo " <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
     echo ""
@@ -49,8 +51,10 @@ elif [[ "$rpi_ver" -eq 2 ]]; then
     rootfs=ArchLinuxARM-rpi-2-latest.tar.gz
 elif [[ "$rpi_ver" -eq 3 ]]; then
     rootfs=ArchLinuxARM-rpi-3-latest.tar.gz
+elif [[ "$rpi_ver" -eq 4 ]]; then
+    rootfs=ArchLinuxARM-rpi-4-latest.tar.gz
 else
-    echo "RPi version can be in range 1-3. Exiting." && exit
+    echo "RPi version can be in range 1-4. Exiting." && exit
 fi
 
 # Check device file
