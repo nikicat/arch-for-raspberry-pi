@@ -13,19 +13,25 @@ rpi_ver=$1
 dev=$2
 part1=$dev"1"
 part2=$dev"2"
+update_image=$3
+check_image=$4
 
 # Menu
 if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo ""
-    echo "Usage: $0 <version> <device>"
+    echo "Usage: $0 <rpi_version> <device> <update_image> <check_image>"
     echo ""
-    echo " <version> can be: "
+    echo " <rpi_version> can be: "
     echo "  1 - ARMv6 (Raspberry Pi 1 / Zero / Zero W)"
     echo "  2 - ARMv7 (Raspberry Pi 2 / 3)"
     echo "  3 - AArch64 (Raspberry Pi 3)"
     echo "  4 - ARMv8 (Raspberry Pi 4)"
     echo ""
     echo " <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
+    echo ""
+    echo " <update_image> - download (1) or not (0) new rootfs if file already exist (default=0)"
+    echo ""
+    echo " <check_image> - check (1) or not (0) rootfs file (default=1)"
     echo ""
     exit
 fi
@@ -69,9 +75,19 @@ if ! cd "$temp_dir"; then
 fi
 mkdir boot root
 
-echo "Downloading root FS."
-if ! wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"; then
-    echo "Error while downloading FS. Exiting." && exit
+if [[ ! -f "$rootfs" ]] || [[ "$update_image" == 1 ]]; then
+    echo "Downloading root FS."
+    if ! wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"; then
+        echo "Error while downloading FS. Exiting." && exit
+    fi
+    wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"".md5"
+else
+    echo "Rootfs already exist. Skipping download."
+fi
+
+echo "Checking image hash."
+if ! md5sum --check "$rootfs"".md5" ; then
+    echo "MD5 checksum failed for image. Exiting." && exit
 fi
 
 echo "Creating disk layout."
