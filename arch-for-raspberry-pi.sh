@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Home:
+# https://github.com/Pernat1y/arch-for-raspberry-pi/
+#
 # Docs:
 # https://archlinuxarm.org/platforms/armv6/raspberry-pi
 # https://archlinuxarm.org/platforms/armv7/broadcom/raspberry-pi-2
@@ -17,10 +20,10 @@ if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo "Usage: $0 <version> <device>"
     echo ""
     echo " <version> can be: "
-    echo "  1 for Raspberry Pi Zero / Zero W / 1 (ARM v6) "
-    echo "  2 for Raspberry Pi 2 / 3 (ARM v7) "
-    echo "  3 for Raspberry Pi 3 / 3+ (ARM v8 / AAarch64) "
-    echo "  4 for Raspberry Pi 4 (ARM v8) "
+    echo "  1 - ARMv6 (Raspberry Pi 1 / Zero / Zero W)"
+    echo "  2 - ARMv7 (Raspberry Pi 2 / 3)"
+    echo "  3 - AArch64 (Raspberry Pi 3)"
+    echo "  4 - ARMv8 (Raspberry Pi 4)"
     echo ""
     echo " <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
     echo ""
