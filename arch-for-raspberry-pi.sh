@@ -43,10 +43,6 @@ if ! command -v parted > /dev/null; then
     echo -e "I need those packages to be installed: \nwget bsdtar parted dosfstools \nExiting." && exit
 fi
 
-if ! command -v dosfstools > /dev/null; then
-    echo -e "I need those packages to be installed: \nwget bsdtar parted dosfstools \nExiting." && exit
-fi
-
 # Select RPi version
 if [[ "$rpi_ver" -eq 1 ]]; then
     rootfs=ArchLinuxARM-rpi-latest.tar.gz
