@@ -70,7 +70,7 @@ echo "Entering working dir: $temp_dir"
 if ! cd "$temp_dir"; then
     echo "Error while creating temp dir. Exiting." && exit
 fi
-mkdir boot root
+mkdir boot root 2>/dev/null
 
 if [[ ! -f "$rootfs" ]] || [[ "$update_image" == 1 ]]; then
     echo "Downloading root FS."
@@ -108,12 +108,12 @@ if ! parted --script "$dev" mkpart primary ext4 100 100%; then
 fi
 
 echo "Creating boot file systems."
-if ! mkfs.vfat "$part1"; then
+if ! mkfs.vfat "$part1" >/dev/null; then
     echo "Error while creating boot file system on $part1. Exiting." && exit
 fi
 
 echo "Creating root file systems."
-if ! mkfs.ext4 "$part2"; then
+if ! mkfs.ext4 "$part2" >/dev/null; then
     echo "Error while creating root file system on $part2. Exiting." && exit
 fi
 
