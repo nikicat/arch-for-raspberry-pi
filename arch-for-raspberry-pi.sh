@@ -24,7 +24,7 @@ if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo " <rpi_version>:"
     echo "    1 - ARMv6 (Raspberry Pi 1 / Zero / Zero W)"
     echo "    2 - ARMv7 (Raspberry Pi 2 / 3)"
-    echo "    3 - AArch64 (Raspberry Pi 3)"
+    echo "    3 - ARMv8 (Raspberry Pi 3)"
     echo "    4 - ARMv8 (Raspberry Pi 4)"
     echo " <device>       - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
     echo " <update_image> - download (1) or not (0) new rootfs if file already exist (default=0)"
