@@ -37,9 +37,8 @@ enable_uart=1
 ```
 
 # Initialize the pacman keyring, populate the Arch Linux ARM package signing keys and update system
-pacman -Scc
-
 ```
+pacman -Scc
 rm -r /var/lib/pacman/sync /etc/pacman.d/gnupg
 pacman-key --init
 pacman-key --populate archlinuxarm
