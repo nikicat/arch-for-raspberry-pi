@@ -13,22 +13,20 @@ rpi_ver=$1
 dev=$2
 part1=$dev"1"
 part2=$dev"2"
-update_image=$3
-check_image=$4
 
 # Menu
 if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo ""
-    echo "Usage: $0 <rpi_version> <device> <update_image> <check_image>"
+    echo "Usage: $0 <rpi_version> <device>"
     echo ""
     echo " <rpi_version>:"
-    echo "    1 - ARMv6 (Raspberry Pi 1 / Zero / Zero W)"
-    echo "    2 - ARMv7 (Raspberry Pi 2 / 3)"
-    echo "    3 - ARMv8 (Raspberry Pi 3)"
-    echo "    4 - ARMv8 (Raspberry Pi 4)"
-    echo " <device>       - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
-    echo " <update_image> - download (1) or not (0) new rootfs if file already exist (default=0)"
-    echo " <check_image>  - check (1) or not (0) rootfs file (default=1)"
+    echo "    1 - Raspberry Pi 1 / Zero / Zero W (ARMv6)"
+    echo "    2 - Raspberry Pi 2 / 3             (ARMv7)"
+    echo "    3 - Raspberry Pi 3                 (ARMv8)"
+    echo "    4 - Raspberry Pi 4                 (ARMv8)"
+    echo "    5 - Raspberry Pi 4                 (AArch64)"
+    echo ""
+    echo " <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
     echo ""
     exit
 fi
@@ -55,13 +53,20 @@ elif [[ "$rpi_ver" -eq 3 ]]; then
     rootfs=ArchLinuxARM-rpi-3-latest.tar.gz
 elif [[ "$rpi_ver" -eq 4 ]]; then
     rootfs=ArchLinuxARM-rpi-4-latest.tar.gz
+elif [[ "$rpi_ver" -eq 5 ]]; then
+    rootfs=ArchLinuxARM-rpi-aarch64-latest.tar.gz
 else
-    echo "RPi version can be in range 1-4. Exiting." && exit
+    echo "RPi version can be in range 1-5. Exiting." && exit
 fi
 
 # Check device file
 if [[ ! -b "$dev" ]]; then
     echo "No device selected or not special block file. Exiting." && exit
+fi
+
+# Check if device already mounted
+if mount | grep -q "$dev"; then
+    echo "Device or partition from $dev is already mounted. Exiting." && exit
 fi
 
 # Create temp dir
@@ -72,7 +77,7 @@ if ! cd "$temp_dir"; then
 fi
 mkdir boot root 2>/dev/null
 
-if [[ ! -f "$rootfs" ]] || [[ "$update_image" == 1 ]]; then
+if [[ ! -f "$rootfs" ]]; then
     echo "Downloading root FS."
     if ! wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"; then
         echo "Error while downloading FS. Exiting." && exit
