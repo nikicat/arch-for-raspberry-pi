@@ -9,12 +9,20 @@
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4
 
+# Uncomment for debug
+# set -x
+
+# You can change size of the root partition
+#root_size=3600
+root_size=100%
+
+# Get vars from args
 rpi_ver=$1
 dev=$2
 part1=$dev"1"
 part2=$dev"2"
 
-# Menu
+# Show help
 if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo ''
     echo "Usage: $0 <rpi_version> <device>"
@@ -113,7 +121,7 @@ if ! parted --script "$dev" set 1 boot on; then
 fi
 
 echo "Creating root partition on $dev "
-if ! parted --script "$dev" mkpart primary ext4 200 100%; then
+if ! parted --script "$dev" mkpart primary ext4 200 "$root_size"; then
     echo "Error while creating disk layout for root partition. Exiting." && exit
 fi
 
@@ -142,6 +150,11 @@ if ! bsdtar -xpf "$rootfs" -C root >/dev/null; then
     echo "Error while unpacking rootfs. Exiting." && exit
 fi
 sync && mv root/boot/* boot && sync
+
+# Fix for AArch64 version
+if [[ "$rpi_ver" -eq 5 ]]; then
+    sed -i 's/mmcblk0/mmcblk1/g' root/etc/fstab
+fi
 
 echo "Unmounting file systems."
 if ! umount boot root; then
