@@ -3,21 +3,21 @@ Script to write Arch Linux images for Raspberry Pi.
 
 # Options
 ```
-Usage: ./arch-for-raspberry-pi.sh <rpi_version> <device> <update_image> <check_image>
+Usage: ./arch-for-raspberry-pi.sh <rpi_version> <device>
 
  <rpi_version>:
-   1 - ARMv6 (Raspberry Pi 1 / Zero / Zero W)
-   2 - ARMv7 (Raspberry Pi 2 / 3)
-   3 - ARMv8 (Raspberry Pi 3)
-   4 - ARMv8 (Raspberry Pi 4)
- <device>       - disk to write image to. Something like /dev/sdX or /dev/mmcblkX
- <update_image> - download (1) or not (0) new rootfs if file already exist (default=0)
- <check_image>  - check (1) or not (0) rootfs file (default=1)
+    1 - Raspberry Pi 1 / Zero / Zero W (ARMv6)
+    2 - Raspberry Pi 2 / 3             (ARMv7)
+    3 - Raspberry Pi 3                 (ARMv8)
+    4 - Raspberry Pi 4                 (ARMv8)
+    5 - Raspberry Pi 4                 (AArch64)
+
+ <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX
 ```
 
 # Example
 ```
-./arch-for-raspberry-pi.sh 4 /dev/sdX 1 1
+./arch-for-raspberry-pi.sh 5 /dev/sdX
 ```
 
 # Download images
