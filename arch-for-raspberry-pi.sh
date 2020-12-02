@@ -16,18 +16,18 @@ part2=$dev"2"
 
 # Menu
 if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
-    echo ""
+    echo ''
     echo "Usage: $0 <rpi_version> <device>"
-    echo ""
-    echo " <rpi_version>:"
-    echo "    1 - Raspberry Pi 1 / Zero / Zero W (ARMv6)"
-    echo "    2 - Raspberry Pi 2 / 3             (ARMv7)"
-    echo "    3 - Raspberry Pi 3                 (ARMv8)"
-    echo "    4 - Raspberry Pi 4                 (ARMv8)"
-    echo "    5 - Raspberry Pi 4                 (AArch64)"
-    echo ""
-    echo " <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX"
-    echo ""
+    echo ''
+    echo ' <rpi_version>:'
+    echo '    1 - Raspberry Pi 1 / Zero (W) [ARMv6]'
+    echo '    2 - Raspberry Pi 2 / 3        [ARMv7]'
+    echo '    3 - Raspberry Pi 3            [ARMv8]'
+    echo '    4 - Raspberry Pi 4            [ARMv8]'
+    echo '    5 - Raspberry Pi 4            [AArch64]'
+    echo ''
+    echo ' <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX'
+    echo ''
     exit
 fi
 
@@ -42,6 +42,11 @@ fi
 
 if ! command -v parted > /dev/null; then
     echo -e "I need those packages to be installed: \nwget bsdtar parted dosfstools \nExiting." && exit
+fi
+
+# Check if root
+if [ "$EUID" -ne 0 ]; then
+    echo 'Needs to be root ro run this. Exiting.' && exit
 fi
 
 # Select RPi version
