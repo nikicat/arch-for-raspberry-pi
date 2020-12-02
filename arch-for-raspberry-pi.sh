@@ -98,7 +98,7 @@ if ! parted --script "$dev" mklabel msdos; then
 fi
 
 echo "Creating boot partition on $dev"
-if ! parted --script "$dev" mkpart primary fat32 0 100; then
+if ! parted --script "$dev" mkpart primary fat32 0 200; then
     echo "Error while creating disk layout for boot partition. Exiting." && exit
 fi
 
@@ -108,7 +108,7 @@ if ! parted --script "$dev" set 1 boot on; then
 fi
 
 echo "Creating root partition on $dev "
-if ! parted --script "$dev" mkpart primary ext4 100 100%; then
+if ! parted --script "$dev" mkpart primary ext4 200 100%; then
     echo "Error while creating disk layout for root partition. Exiting." && exit
 fi
 
