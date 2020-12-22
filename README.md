@@ -42,7 +42,7 @@ https://sourceforge.net/projects/win32diskimager/
 
 https://www.balena.io/etcher/
 
-# Enable serial port (USB to TTL serial)
+# Enable serial (TTL) port
 If you want to enable serial, add following lines to config.txt file on 'boot' (fat16) partition:
 
 ```
