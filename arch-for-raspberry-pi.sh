@@ -82,35 +82,39 @@ if mount | grep -q "$dev"; then
     echo "Device or partition from $dev is already mounted. Exiting." && exit
 fi
 
+# Print device info
+echo -e "\nTarget device is:"
+fdisk -l "$dev" | head -n 2
+
 # Create temp dir
 temp_dir=$(mktemp -d)
-echo "Entering working dir: $temp_dir"
+echo -e "\nEntering working dir: $temp_dir"
 if ! cd "$temp_dir"; then
     echo "Error while creating temp dir. Exiting." && exit
 fi
 mkdir boot root 2>/dev/null
 
 if [[ ! -f "$rootfs" ]]; then
-    echo "Downloading root FS."
-    if ! wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"; then
+    echo -e "\nDownloading root FS."
+    if ! wget --quiet --show-progress "http://os.archlinuxarm.org/os/""$rootfs"; then
         echo "Error while downloading FS. Exiting." && exit
     fi
     wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"".md5"
 else
-    echo "Rootfs already exist. Skipping download."
+    echo -e "\nRootfs already exist. Skipping download."
 fi
 
-echo "Checking image hash."
+echo -e "\nChecking image hash."
 if ! md5sum --check "$rootfs"".md5" ; then
     echo "MD5 checksum failed for image. Exiting." && exit
 fi
 
-echo "Creating disk layout."
+echo -e "\nCreating disk layout."
 if ! parted --script "$dev" mklabel msdos; then
     echo "Error while creating disk layout. Exiting." && exit
 fi
 
-echo "Creating boot partition on $dev"
+echo -e "\nCreating boot partition on $dev"
 if ! parted --script "$dev" mkpart primary fat32 0 200; then
     echo "Error while creating disk layout for boot partition. Exiting." && exit
 fi
@@ -120,32 +124,32 @@ if ! parted --script "$dev" set 1 boot on; then
     echo "Error while setting boot flag on partition. Exiting." && exit
 fi
 
-echo "Creating root partition on $dev "
+echo -e "\nCreating root partition on $dev "
 if ! parted --script "$dev" mkpart primary ext4 200 "$root_size"; then
     echo "Error while creating disk layout for root partition. Exiting." && exit
 fi
 
-echo "Creating boot file systems."
+echo -e "\nCreating boot file systems."
 if ! mkfs.vfat "$part1" >/dev/null; then
     echo "Error while creating boot file system on $part1. Exiting." && exit
 fi
 
-echo "Creating root file systems."
+echo -e "\nCreating root file systems."
 if ! mkfs.ext4 "$part2" >/dev/null; then
     echo "Error while creating root file system on $part2. Exiting." && exit
 fi
 
-echo "Mounting boot file system."
+echo -e "\nMounting boot file system."
 if ! mount "$part1" boot; then
     echo "Error while mounting $part1. Exiting." && exit
 fi
 
-echo "Mounting root file system."
+echo -e "\nMounting root file system."
 if ! mount "$part2" root; then
     echo "Error while mounting $part2. Exiting." && exit
 fi
 
-echo "Unpacking rootfs."
+echo -e "\nUnpacking rootfs."
 if ! bsdtar -xpf "$rootfs" -C root >/dev/null; then
     echo "Error while unpacking rootfs. Exiting." && exit
 fi
@@ -156,12 +160,12 @@ if [[ "$rpi_ver" -eq 5 ]]; then
     sed -i 's/mmcblk0/mmcblk1/g' root/etc/fstab
 fi
 
-echo "Unmounting file systems."
+echo -e "\nUnmounting file systems."
 if ! umount boot root; then
     echo "Error while unmounting filesystems." && exit
 fi
 
-echo "Cleaning up."
+echo -e "\nCleaning up."
 cd - && rm -r "$temp_dir"
 
-echo "Done."
+echo -e "\nDone."
