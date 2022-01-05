@@ -2,14 +2,15 @@
 
 # Home:
 # https://github.com/Pernat1y/arch-for-raspberry-pi/
-#
+
 # Docs:
 # https://archlinuxarm.org/platforms/armv6/raspberry-pi
 # https://archlinuxarm.org/platforms/armv7/broadcom/raspberry-pi-2
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4
+# https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-zero-2
 
-# Uncomment for debug
+# Uncomment for debug:
 # set -x
 
 # You can change size of the root partition
@@ -28,11 +29,9 @@ if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo "Usage: $0 <rpi_version> <device>"
     echo ''
     echo ' <rpi_version>:'
-    echo '    1 - Raspberry Pi 1 / Zero (W) [ARMv6]'
-    echo '    2 - Raspberry Pi 2 / 3        [ARMv7]'
-    echo '    3 - Raspberry Pi 3            [ARMv8]'
-    echo '    4 - Raspberry Pi 4            [ARMv8]'
-    echo '    5 - Raspberry Pi 4            [AArch64]'
+    echo '    1 - ARMv6     [Raspberry Pi 1 / Zero]'
+    echo '    2 - ARMv7/v8  [Raspberry Pi 2 / 3 / 4 / Zero 2]'
+    echo '    3 - AArch64   [Raspberry Pi 3 / 4 / Zero 2]'
     echo ''
     echo ' <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX'
     echo ''
@@ -61,15 +60,11 @@ fi
 if [[ "$rpi_ver" -eq 1 ]]; then
     rootfs=ArchLinuxARM-rpi-latest.tar.gz
 elif [[ "$rpi_ver" -eq 2 ]]; then
-    rootfs=ArchLinuxARM-rpi-2-latest.tar.gz
+    rootfs=ArchLinuxARM-rpi-armv7-latest.tar.gz
 elif [[ "$rpi_ver" -eq 3 ]]; then
-    rootfs=ArchLinuxARM-rpi-3-latest.tar.gz
-elif [[ "$rpi_ver" -eq 4 ]]; then
-    rootfs=ArchLinuxARM-rpi-4-latest.tar.gz
-elif [[ "$rpi_ver" -eq 5 ]]; then
     rootfs=ArchLinuxARM-rpi-aarch64-latest.tar.gz
 else
-    echo "RPi version can be in range 1-5. Exiting." && exit
+    echo "RPi version can be in range 1-3. Exiting." && exit
 fi
 
 # Check device file
@@ -169,3 +164,4 @@ echo -e "\nCleaning up."
 cd - && rm -r "$temp_dir"
 
 echo -e "\nDone."
+
