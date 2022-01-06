@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Home:
 # https://github.com/Pernat1y/arch-for-raspberry-pi/
