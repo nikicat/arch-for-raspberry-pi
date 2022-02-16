@@ -3,12 +3,11 @@ Script to write Arch Linux images for Raspberry Pi.
 
 # Options
 ```
-Usage: ./arch-for-raspberry-pi.sh <rpi_version> <device>
+Usage: arch-for-raspberry-pi.sh <rpi_arch> <device>
 
- <rpi_version>:
-    1 - ARMv6     [Raspberry Pi 1 / Zero]
-    2 - ARMv7/v8  [Raspberry Pi 2 / 3 / 4 / Zero 2]
-    3 - AArch64   [Raspberry Pi 3 / 4 / Zero 2]
+ <rpi_arch>:
+    1 - ARMv7/v8  [Raspberry Pi 2 / 3 / 4 / Zero 2]
+    2 - AArch64   [Raspberry Pi 3 / 4 / Zero 2]
 
  <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX
 
