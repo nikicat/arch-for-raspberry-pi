@@ -4,7 +4,6 @@
 # https://github.com/Pernat1y/arch-for-raspberry-pi/
 
 # Docs:
-# https://archlinuxarm.org/platforms/armv6/raspberry-pi
 # https://archlinuxarm.org/platforms/armv7/broadcom/raspberry-pi-2
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4
@@ -18,7 +17,7 @@
 root_size=100%
 
 # Get vars from args
-rpi_ver=$1
+rpi_arch=$1
 dev=$2
 part1=$dev"1"
 part2=$dev"2"
@@ -26,12 +25,11 @@ part2=$dev"2"
 # Show help
 if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo ''
-    echo "Usage: $0 <rpi_version> <device>"
+    echo "Usage: $0 <rpi_arch> <device>"
     echo ''
-    echo ' <rpi_version>:'
-    echo '    1 - ARMv6     [Raspberry Pi 1 / Zero]'
-    echo '    2 - ARMv7/v8  [Raspberry Pi 2 / 3 / 4 / Zero 2]'
-    echo '    3 - AArch64   [Raspberry Pi 3 / 4 / Zero 2]'
+    echo ' <rpi_arch>:'
+    echo '    1 - ARMv7/v8  [Raspberry Pi 2 / 3 / 4 / Zero 2]'
+    echo '    2 - AArch64   [Raspberry Pi 3 / 4 / Zero 2]'
     echo ''
     echo ' <device> - disk to write image to. Something like /dev/sdX or /dev/mmcblkX'
     echo ''
@@ -57,14 +55,12 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Select RPi version
-if [[ "$rpi_ver" -eq 1 ]]; then
-    rootfs=ArchLinuxARM-rpi-latest.tar.gz
-elif [[ "$rpi_ver" -eq 2 ]]; then
+if [[ "$rpi_arch" -eq 1 ]]; then
     rootfs=ArchLinuxARM-rpi-armv7-latest.tar.gz
-elif [[ "$rpi_ver" -eq 3 ]]; then
+elif [[ "$rpi_arch" -eq 2 ]]; then
     rootfs=ArchLinuxARM-rpi-aarch64-latest.tar.gz
 else
-    echo "RPi version can be in range 1-3. Exiting." && exit
+    echo "RPi arch can be only 1 or 2. Exiting." && exit
 fi
 
 # Check device file
@@ -151,7 +147,7 @@ fi
 sync && mv root/boot/* boot && sync
 
 # Fix for AArch64 version
-if [[ "$rpi_ver" -eq 5 ]]; then
+if [[ "$rpi_arch" -eq 2 ]]; then
     sed -i 's/mmcblk0/mmcblk1/g' root/etc/fstab
 fi
 
