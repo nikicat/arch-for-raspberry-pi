@@ -15,7 +15,7 @@ Usage: arch-for-raspberry-pi.sh <rpi_arch> <device>
 
 # Example
 ```
-./arch-for-raspberry-pi.sh 5 /dev/sdX
+./arch-for-raspberry-pi.sh 1 /dev/sdX
 ```
 
 # Download images
