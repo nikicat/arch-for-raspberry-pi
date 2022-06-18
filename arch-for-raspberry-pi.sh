@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/bash -e
 
 # Home:
 # https://github.com/Pernat1y/arch-for-raspberry-pi/
@@ -8,6 +8,7 @@
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4
 # https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-zero-2
+# https://archlinuxarm.org/forum/viewtopic.php?f=67&t=15422&start=20#p67299
 
 # Uncomment for debug:
 # set -x
@@ -19,8 +20,8 @@ root_size=100%
 # Get vars from args
 rpi_arch=$1
 dev=$2
-part1=$dev"1"
-part2=$dev"2"
+part1=$dev"p1"
+part2=$dev"p2"
 
 # Show help
 if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
@@ -35,6 +36,8 @@ if [[ -z "$@" || "$@" == "-h"  || "$@" == "--help" ]]; then
     echo ''
     exit
 fi
+
+mkdir -p root 2>/dev/null
 
 # Check for required tools
 if ! command -v wget > /dev/null; then
@@ -77,87 +80,58 @@ fi
 echo -e "\nTarget device is:"
 fdisk -l "$dev" | head -n 2
 
-# Create temp dir
-temp_dir=$(mktemp -d)
-echo -e "\nEntering working dir: $temp_dir"
-if ! cd "$temp_dir"; then
-    echo "Error while creating temp dir. Exiting." && exit
-fi
-mkdir boot root 2>/dev/null
-
 if [[ ! -f "$rootfs" ]]; then
     echo -e "\nDownloading root FS."
     if ! wget --quiet --show-progress "http://os.archlinuxarm.org/os/""$rootfs"; then
         echo "Error while downloading FS. Exiting." && exit
     fi
-    wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"".md5"
 else
     echo -e "\nRootfs already exist. Skipping download."
 fi
 
-echo -e "\nChecking image hash."
+if [[ ! -f "$rootfs"".md5" ]]; then
+    wget --quiet "http://os.archlinuxarm.org/os/""$rootfs"".md5"
+fi
+
+echo "Checking image hash."
 if ! md5sum --check "$rootfs"".md5" ; then
-    echo "MD5 checksum failed for image. Exiting." && exit
+    echo "MD5 checksum failed for image. Remove '$rootfs' and/or '$rootfs.md5' and try again." && exit
 fi
 
-echo -e "\nCreating disk layout."
-if ! parted --script "$dev" mklabel msdos; then
-    echo "Error while creating disk layout. Exiting." && exit
-fi
+echo "Creating disk layout."
+parted --script "$dev" mklabel msdos
 
-echo -e "\nCreating boot partition on $dev"
-if ! parted --script "$dev" mkpart primary fat32 0 200; then
-    echo "Error while creating disk layout for boot partition. Exiting." && exit
-fi
+echo "Creating boot partition on $dev"
+parted --script "$dev" mkpart primary fat32 0% 200
 
 echo "Setting boot flag on partition."
-if ! parted --script "$dev" set 1 boot on; then
-    echo "Error while setting boot flag on partition. Exiting." && exit
-fi
+parted --script "$dev" set 1 boot on
 
-echo -e "\nCreating root partition on $dev "
-if ! parted --script "$dev" mkpart primary ext4 200 "$root_size"; then
-    echo "Error while creating disk layout for root partition. Exiting." && exit
-fi
+echo "Creating root partition on $dev "
+parted --script "$dev" mkpart primary ext4 200 "$root_size"
 
-echo -e "\nCreating boot file systems."
-if ! mkfs.vfat "$part1" >/dev/null; then
-    echo "Error while creating boot file system on $part1. Exiting." && exit
-fi
+echo "Creating boot file system."
+mkfs.vfat "$part1" >/dev/null
 
-echo -e "\nCreating root file systems."
-if ! mkfs.ext4 "$part2" >/dev/null; then
-    echo "Error while creating root file system on $part2. Exiting." && exit
-fi
+echo "Creating root file system."
+mkfs.ext4 "$part2" >/dev/null
 
-echo -e "\nMounting boot file system."
-if ! mount "$part1" boot; then
-    echo "Error while mounting $part1. Exiting." && exit
-fi
+echo "Mounting root file system."
+mount "$part2" root
 
-echo -e "\nMounting root file system."
-if ! mount "$part2" root; then
-    echo "Error while mounting $part2. Exiting." && exit
-fi
+mkdir root/boot
 
-echo -e "\nUnpacking rootfs."
-if ! bsdtar -xpf "$rootfs" -C root >/dev/null; then
-    echo "Error while unpacking rootfs. Exiting." && exit
-fi
-sync && mv root/boot/* boot && sync
+echo "Mounting boot file system."
+mount "$part1" root/boot
 
-# Fix for AArch64 version
-if [[ "$rpi_arch" -eq 2 ]]; then
-    sed -i 's/mmcblk0/mmcblk1/g' root/etc/fstab
-fi
+echo "Unpacking rootfs."
+bsdtar -xpf "$rootfs" -C root >/dev/null
 
-echo -e "\nUnmounting file systems."
-if ! umount boot root; then
-    echo "Error while unmounting filesystems." && exit
-fi
+echo "Patching boot.txt according to https://archlinuxarm.org/forum/viewtopic.php?f=67&t=15422&start=20#p67299"
+cp boot.txt root/boot/boot.txt
+(cd root/boot && ./mkscr)
 
-echo -e "\nCleaning up."
-cd - && rm -r "$temp_dir"
+echo "Unmounting file systems."
+umount root/boot root
 
-echo -e "\nDone."
-
+echo "Done."
